@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DesignFlow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #111118;
+    --bg3: #1a1a24;
+    --bg4: #222230;
+    --accent: #a259ff;
+    --accent2: #7c3aed;
+    --accent-glow: rgba(162,89,255,0.18);
+    --teal: #00e5c3;
+    --teal-dim: rgba(0,229,195,0.12);
+    --text: #f0f0fa;
+    --text2: #9191a8;
+    --text3: #5a5a72;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(162,89,255,0.25);
+    --red: #ff5555;
+    --amber: #ffb020;
+    --green: #00c98d;
+    --card-r: 16px;
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0; opacity: 0.6;
+  }
+
+  /* ── SIDEBAR ── */
+  #sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0; width: 220px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    padding: 24px 0;
+    z-index: 100;
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  }
+  .logo {
+    padding: 0 20px 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+  .logo-mark {
+    font-family: var(--font-display);
+    font-size: 22px; font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--accent), var(--teal));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .logo-sub { font-size: 11px; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 20px; cursor: pointer;
+    color: var(--text2); font-size: 14px; font-weight: 400;
+    border-left: 2px solid transparent;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-glow); }
+  .nav-icon { width: 18px; height: 18px; opacity: 0.8; }
+  .nav-badge {
+    margin-left: auto; background: var(--accent); color: #fff;
+    font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 20px;
+  }
+  .sidebar-footer {
+    margin-top: auto; padding: 16px 20px 0;
+    border-top: 1px solid var(--border);
+  }
+  .user-chip {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent2), var(--teal));
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-size: 13px; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+  }
+  .user-name { font-size: 13px; font-weight: 500; }
+  .user-role { font-size: 11px; color: var(--text3); }
+
+  /* ── MAIN ── */
+  #main {
+    margin-left: 220px;
+    padding: 32px 32px 80px;
+    position: relative; z-index: 1;
+    max-width: 1200px;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 32px;
+  }
+  .page-title {
+    font-family: var(--font-display);
+    font-size: 28px; font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .page-title span { color: var(--accent); }
+  .topbar-actions { display: flex; gap: 10px; align-items: center; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 9px 18px; border-radius: 10px;
+    font-family: var(--font-body); font-size: 13px; font-weight: 500;
+    cursor: pointer; border: none; transition: all 0.2s; text-decoration: none;
+  }
+  .btn-primary {
+    background: var(--accent); color: #fff;
+  }
+  .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+  .btn-ghost {
+    background: var(--bg3); color: var(--text2);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── LEDGER STRIP ── */
+  .ledger {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 14px; margin-bottom: 28px;
+  }
+  .ledger-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--card-r);
+    padding: 18px 20px;
+    position: relative; overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .ledger-card:hover { border-color: var(--border2); }
+  .ledger-card::after {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  }
+  .ledger-card.earned::after { background: linear-gradient(90deg, var(--accent), var(--teal)); }
+  .ledger-card.pending::after { background: var(--amber); }
+  .ledger-card.projects::after { background: var(--teal); }
+  .ledger-card.overdue::after { background: var(--red); }
+  .ledger-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
+  .ledger-value {
+    font-family: var(--font-display); font-size: 26px; font-weight: 700;
+    letter-spacing: -1px;
+  }
+  .ledger-sub { font-size: 12px; color: var(--text3); margin-top: 4px; }
+  .ledger-card.earned .ledger-value { color: var(--teal); }
+  .ledger-card.pending .ledger-value { color: var(--amber); }
+  .ledger-card.projects .ledger-value { color: var(--text); }
+  .ledger-card.overdue .ledger-value { color: var(--red); }
+
+  /* ── SECTION HEADER ── */
+  .section-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: var(--font-display); font-size: 16px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1px; color: var(--text2);
+  }
+  .filter-row { display: flex; gap: 8px; }
+  .filter-pill {
+    padding: 5px 14px; border-radius: 20px;
+    font-size: 12px; font-weight: 500; cursor: pointer;
+    border: 1px solid var(--border);
+    color: var(--text2); background: transparent;
+    transition: all 0.2s;
+  }
+  .filter-pill.active, .filter-pill:hover {
+    border-color: var(--accent); color: var(--accent); background: var(--accent-glow);
+  }
+
+  /* ── PROJECT GRID ── */
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .project-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--card-r);
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+    position: relative; overflow: hidden;
+  }
+  .project-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  }
+  .project-card.type-logo::before { background: var(--accent); }
+  .project-card.type-branding::before { background: var(--teal); }
+  .project-card.type-socials::before { background: var(--amber); }
+  .project-card.type-print::before { background: var(--green); }
+  .project-card.type-web::before { background: #ff7eb3; }
+  .project-card:hover { border-color: var(--border2); transform: translateY(-2px); background: var(--bg3); }
+  .project-card:hover .card-arrow { opacity: 1; transform: translateX(0); }
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+  .client-initial {
+    width: 42px; height: 42px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-size: 17px; font-weight: 800;
+    flex-shrink: 0;
+  }
+  .badge {
+    padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 500;
+    letter-spacing: 0.3px;
+  }
+  .badge-progress { background: rgba(162,89,255,0.15); color: var(--accent); }
+  .badge-feedback { background: rgba(255,176,32,0.15); color: var(--amber); }
+  .badge-final { background: rgba(0,201,141,0.15); color: var(--green); }
+  .badge-review { background: rgba(0,229,195,0.12); color: var(--teal); }
+  .card-client { font-family: var(--font-display); font-size: 16px; font-weight: 700; margin-bottom: 3px; }
+  .card-type { font-size: 12px; color: var(--text3); }
+  .card-meta { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .payment-dots { display: flex; gap: 5px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bg4); transition: background 0.2s; }
+  .dot.paid { background: var(--green); }
+  .dot.partial { background: var(--amber); }
+  .card-due { font-size: 11px; color: var(--text3); }
+  .card-arrow { font-size: 18px; color: var(--accent); opacity: 0; transform: translateX(-4px); transition: all 0.2s; margin-left: auto; }
+  .deliverables-preview { margin-top: 12px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .deliv-chip { background: var(--bg4); border-radius: 6px; padding: 3px 8px; font-size: 11px; color: var(--text2); }
+
+  /* ── PROJECT DETAIL PANEL ── */
+  #detail-panel {
+    position: fixed; top: 0; right: -100%; bottom: 0; width: min(640px, 100vw);
+    background: var(--bg2);
+    border-left: 1px solid var(--border);
+    overflow-y: auto; z-index: 200;
+    transition: right 0.35s cubic-bezier(0.4,0,0.2,1);
+    padding: 28px;
+  }
+  #detail-panel.open { right: 0; }
+  #overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    z-index: 199; opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+    backdrop-filter: blur(4px);
+  }
+  #overlay.show { opacity: 1; pointer-events: all; }
+
+  .panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  .panel-close {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--bg3); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text2); font-size: 18px;
+    transition: all 0.2s;
+  }
+  .panel-close:hover { background: var(--bg4); color: var(--text); }
+
+  .panel-hero {
+    background: var(--bg3); border-radius: var(--card-r);
+    border: 1px solid var(--border);
+    padding: 20px; margin-bottom: 20px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .panel-initial {
+    width: 56px; height: 56px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-size: 22px; font-weight: 800;
+    flex-shrink: 0;
+  }
+  .panel-title { font-family: var(--font-display); font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .panel-meta { font-size: 13px; color: var(--text2); }
+
+  .panel-section { margin-bottom: 24px; }
+  .panel-section-title {
+    font-family: var(--font-display); font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.5px; color: var(--text3);
+    margin-bottom: 12px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── PAYMENT MILESTONES ── */
+  .milestone-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 14px;
+    background: var(--bg3); border-radius: 10px; margin-bottom: 8px;
+    border: 1px solid var(--border);
+    transition: border-color 0.2s;
+  }
+  .milestone-row.paid-row { border-color: rgba(0,201,141,0.25); }
+  .milestone-info { flex: 1; }
+  .milestone-label { font-size: 14px; font-weight: 500; }
+  .milestone-amount { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .toggle-btn {
+    padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+    cursor: pointer; border: 1px solid var(--border);
+    background: var(--bg4); color: var(--text2);
+    font-family: var(--font-body);
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .toggle-btn.paid-btn { background: rgba(0,201,141,0.15); color: var(--green); border-color: rgba(0,201,141,0.3); }
+  .toggle-btn:hover { border-color: var(--accent); }
+
+  /* ── DELIVERABLES ── */
+  .deliv-list { display: flex; flex-direction: column; gap: 6px; }
+  .deliv-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; background: var(--bg3); border-radius: 8px;
+    border: 1px solid var(--border); font-size: 13px;
+    transition: all 0.2s;
+  }
+  .deliv-item:hover { border-color: var(--border2); }
+  .deliv-check {
+    width: 18px; height: 18px; border-radius: 5px;
+    border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0; transition: all 0.2s;
+    background: transparent;
+  }
+  .deliv-check.done { background: var(--accent); border-color: var(--accent); }
+  .deliv-check.done::after { content: '✓'; font-size: 11px; color: #fff; font-weight: 700; }
+  .deliv-text { flex: 1; }
+  .deliv-text.done-text { text-decoration: line-through; color: var(--text3); }
+  .deliv-tag { font-size: 10px; padding: 2px 7px; border-radius: 4px; background: var(--bg4); color: var(--text3); }
+
+  /* ── BRIEF ── */
+  .brief-area {
+    width: 100%;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px;
+    color: var(--text); font-family: var(--font-body); font-size: 13px;
+    line-height: 1.7; resize: vertical; min-height: 120px;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .brief-area:focus { border-color: var(--accent); }
+  .brief-save {
+    margin-top: 8px; padding: 7px 16px; border-radius: 8px;
+    background: var(--accent-glow); color: var(--accent);
+    border: 1px solid var(--border2); font-family: var(--font-body);
+    font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s;
+  }
+  .brief-save:hover { background: var(--accent); color: #fff; }
+
+  /* ── IMAGE GALLERY ── */
+  .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .gallery-thumb {
+    aspect-ratio: 1; border-radius: 10px;
+    background: var(--bg3); border: 1px dashed var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; position: relative; overflow: hidden;
+    transition: all 0.2s;
+  }
+  .gallery-thumb:hover { border-color: var(--accent); }
+  .gallery-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+  .gallery-thumb .add-icon { font-size: 24px; color: var(--text3); }
+  .gallery-input { display: none; }
+  .gallery-del {
+    position: absolute; top: 4px; right: 4px;
+    background: rgba(0,0,0,0.7); color: #fff; border: none;
+    width: 20px; height: 20px; border-radius: 5px; font-size: 11px;
+    cursor: pointer; display: none; align-items: center; justify-content: center;
+  }
+  .gallery-thumb:hover .gallery-del { display: flex; }
+
+  /* ── ADD PROJECT MODAL ── */
+  #modal {
+    position: fixed; inset: 0; z-index: 300;
+    display: none; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+  }
+  #modal.show { display: flex; }
+  .modal-box {
+    background: var(--bg2); border: 1px solid var(--border2);
+    border-radius: 20px; padding: 28px;
+    width: min(480px, calc(100vw - 32px));
+    max-height: 90vh; overflow-y: auto;
+  }
+  .modal-title { font-family: var(--font-display); font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+  .form-group { margin-bottom: 16px; }
+  .form-label { font-size: 12px; color: var(--text2); margin-bottom: 6px; display: block; letter-spacing: 0.5px; }
+  .form-input, .form-select {
+    width: 100%; padding: 10px 14px;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text);
+    font-family: var(--font-body); font-size: 14px; outline: none;
+    transition: border-color 0.2s;
+    appearance: none;
+  }
+  .form-input:focus, .form-select:focus { border-color: var(--accent); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+
+  /* ── PAYMENT PAGE ── */
+  .payment-table { width: 100%; }
+  .payment-table th {
+    font-size: 11px; color: var(--text3); text-align: left;
+    padding: 8px 12px; text-transform: uppercase; letter-spacing: 1px;
+    border-bottom: 1px solid var(--border);
+  }
+  .payment-table td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+  .payment-table tr:last-child td { border-bottom: none; }
+  .payment-table tr:hover td { background: var(--bg3); }
+
+  /* ── CALENDAR / SCHEDULE ── */
+  .schedule-item {
+    display: flex; gap: 14px; padding: 14px;
+    background: var(--bg2); border-radius: 12px;
+    border: 1px solid var(--border); margin-bottom: 8px;
+    transition: all 0.2s;
+  }
+  .schedule-item:hover { border-color: var(--border2); }
+  .sched-date {
+    width: 44px; text-align: center; flex-shrink: 0;
+    background: var(--bg3); border-radius: 8px; padding: 6px;
+  }
+  .sched-day { font-size: 11px; color: var(--text3); text-transform: uppercase; }
+  .sched-num { font-family: var(--font-display); font-size: 20px; font-weight: 700; line-height: 1; }
+  .sched-info { flex: 1; }
+  .sched-title { font-size: 14px; font-weight: 500; }
+  .sched-client { font-size: 12px; color: var(--text2); margin-top: 3px; }
+  .sched-badge { margin-left: auto; align-self: center; }
+
+  /* ── PAGE VIEWS ── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── MOBILE HAMBURGER ── */
+  #hamburger {
+    display: none; position: fixed; top: 16px; left: 16px; z-index: 300;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 10px; width: 40px; height: 40px;
+    align-items: center; justify-content: center; cursor: pointer;
+    flex-direction: column; gap: 5px;
+  }
+  #hamburger span { width: 18px; height: 2px; background: var(--text); border-radius: 2px; transition: all 0.3s; }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center; padding: 48px 24px; color: var(--text3);
+  }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.3; }
+  .empty-text { font-size: 14px; }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar { height: 4px; background: var(--bg4); border-radius: 2px; margin-top: 10px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--accent), var(--teal)); transition: width 0.5s; }
+
+  /* ── TOOLTIPS / TOASTS ── */
+  #toast {
+    position: fixed; bottom: 24px; right: 24px; z-index: 999;
+    background: var(--bg3); border: 1px solid var(--border2);
+    border-radius: 12px; padding: 12px 18px;
+    font-size: 13px; color: var(--accent);
+    transform: translateY(80px); opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+    pointer-events: none;
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    #sidebar { transform: translateX(-100%); }
+    #sidebar.open { transform: translateX(0); }
+    #main { margin-left: 0; padding: 80px 16px 80px; }
+    .ledger { grid-template-columns: repeat(2, 1fr); }
+    #hamburger { display: flex; }
+    .project-grid { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    .gallery-grid { grid-template-columns: repeat(3,1fr); }
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+  .fade-up { animation: fadeUp 0.35s ease both; }
+  .project-card:nth-child(1) { animation-delay: 0.05s; }
+  .project-card:nth-child(2) { animation-delay: 0.10s; }
+  .project-card:nth-child(3) { animation-delay: 0.15s; }
+  .project-card:nth-child(4) { animation-delay: 0.20s; }
+  .project-card:nth-child(5) { animation-delay: 0.25s; }
+  .project-card:nth-child(6) { animation-delay: 0.30s; }
+</style>
+</head>
+<body>
+
+<!-- HAMBURGER -->
+<button id="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+  <span></span><span></span><span></span>
+</button>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="logo">
+    <div class="logo-mark">DesignFlow</div>
+    <div class="logo-sub">Studio OS</div>
+  </div>
+  <div class="nav-item active" onclick="showPage('dashboard',this)">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    Dashboard
+    <span class="nav-badge" id="proj-count-badge">0</span>
+  </div>
+  <div class="nav-item" onclick="showPage('payments',this)">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+    Payments
+  </div>
+  <div class="nav-item" onclick="showPage('schedule',this)">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    Schedule
+  </div>
+  <div class="nav-item" onclick="showPage('analytics',this)">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    Analytics
+  </div>
+  <div class="sidebar-footer">
+    <div class="user-chip">
+      <div class="avatar">SC</div>
+      <div>
+        <div class="user-name">Sarah Chen</div>
+        <div class="user-role">Graphic Designer</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- OVERLAY -->
+<div id="overlay" onclick="closePanel()"></div>
+
+<!-- MAIN CONTENT -->
+<main id="main">
+
+  <!-- ── DASHBOARD PAGE ── -->
+  <div id="page-dashboard" class="page active">
+    <div class="topbar">
+      <div>
+        <div class="page-title">Active <span>Projects</span></div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost" onclick="openModal()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New Project
+        </button>
+      </div>
+    </div>
+
+    <!-- LEDGER -->
+    <div class="ledger">
+      <div class="ledger-card earned">
+        <div class="ledger-label">Earned This Month</div>
+        <div class="ledger-value" id="earned-val">$0</div>
+        <div class="ledger-sub">Confirmed payments</div>
+      </div>
+      <div class="ledger-card pending">
+        <div class="ledger-label">Pending Invoices</div>
+        <div class="ledger-value" id="pending-val">$0</div>
+        <div class="ledger-sub">Awaiting payment</div>
+      </div>
+      <div class="ledger-card projects">
+        <div class="ledger-label">Active Projects</div>
+        <div class="ledger-value" id="proj-count">0</div>
+        <div class="ledger-sub">In pipeline</div>
+      </div>
+      <div class="ledger-card overdue">
+        <div class="ledger-label">Need Feedback</div>
+        <div class="ledger-value" id="feedback-count">0</div>
+        <div class="ledger-sub">Awaiting client</div>
+      </div>
+    </div>
+
+    <!-- FILTERS + GRID -->
+    <div class="section-head">
+      <div class="section-title">All Projects</div>
+      <div class="filter-row">
+        <button class="filter-pill active" onclick="filterProjects('all',this)">All</button>
+        <button class="filter-pill" onclick="filterProjects('In Progress',this)">In Progress</button>
+        <button class="filter-pill" onclick="filterProjects('Feedback Needed',this)">Feedback</button>
+        <button class="filter-pill" onclick="filterProjects('Finalized',this)">Finalized</button>
+      </div>
+    </div>
+    <div class="project-grid" id="project-grid"></div>
+  </div>
+
+  <!-- ── PAYMENTS PAGE ── -->
+  <div id="page-payments" class="page">
+    <div class="topbar">
+      <div class="page-title">Payment <span>Tracker</span></div>
+    </div>
+    <div class="ledger" style="grid-template-columns:repeat(3,1fr)">
+      <div class="ledger-card earned">
+        <div class="ledger-label">Total Collected</div>
+        <div class="ledger-value" id="p-earned">$0</div>
+        <div class="ledger-sub">All paid milestones</div>
+      </div>
+      <div class="ledger-card pending">
+        <div class="ledger-label">Outstanding</div>
+        <div class="ledger-value" id="p-pending">$0</div>
+        <div class="ledger-sub">Unpaid milestones</div>
+      </div>
+      <div class="ledger-card projects">
+        <div class="ledger-label">Collection Rate</div>
+        <div class="ledger-value" id="p-rate">0%</div>
+        <div class="ledger-sub">Paid vs total</div>
+      </div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--card-r);overflow:hidden">
+      <table class="payment-table" id="payment-table">
+        <thead>
+          <tr>
+            <th>Client</th>
+            <th>Project Type</th>
+            <th>Deposit</th>
+            <th>Design Fee</th>
+            <th>Print Fee</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody id="payment-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── SCHEDULE PAGE ── -->
+  <div id="page-schedule" class="page">
+    <div class="topbar">
+      <div class="page-title">Schedule <span>&amp; Deadlines</span></div>
+    </div>
+    <div id="schedule-list"></div>
+  </div>
+
+  <!-- ── ANALYTICS PAGE ── -->
+  <div id="page-analytics" class="page">
+    <div class="topbar">
+      <div class="page-title">Studio <span>Analytics</span></div>
+    </div>
+    <div class="ledger" style="grid-template-columns:repeat(2,1fr);margin-bottom:24px">
+      <div class="ledger-card earned">
+        <div class="ledger-label">Avg Project Value</div>
+        <div class="ledger-value" id="a-avg">$0</div>
+        <div class="ledger-sub">Across all projects</div>
+      </div>
+      <div class="ledger-card projects">
+        <div class="ledger-label">Completion Rate</div>
+        <div class="ledger-value" id="a-rate">0%</div>
+        <div class="ledger-sub">Finalized vs total</div>
+      </div>
+    </div>
+    <div class="section-head"><div class="section-title">Project Type Breakdown</div></div>
+    <div id="type-breakdown" style="display:flex;flex-direction:column;gap:10px;margin-bottom:28px"></div>
+    <div class="section-head"><div class="section-title">Payment Health per Project</div></div>
+    <div id="payment-health" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+</main>
+
+<!-- ── DETAIL PANEL ── -->
+<aside id="detail-panel">
+  <div id="panel-content"></div>
+</aside>
+
+<!-- ── ADD PROJECT MODAL ── -->
+<div id="modal">
+  <div class="modal-box">
+    <div class="modal-title">New Project</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Client Name</label>
+        <input class="form-input" id="f-client" placeholder="e.g. Luna Bakery" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Project Type</label>
+        <select class="form-select" id="f-type">
+          <option>Logo</option>
+          <option>Branding</option>
+          <option>Socials</option>
+          <option>Print</option>
+          <option>Web</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-select" id="f-status">
+          <option>In Progress</option>
+          <option>Feedback Needed</option>
+          <option>Finalized</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Due Date</label>
+        <input class="form-input" id="f-due" type="date" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Deposit ($)</label>
+        <input class="form-input" id="f-deposit" type="number" placeholder="500" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Design Fee ($)</label>
+        <input class="form-input" id="f-design" type="number" placeholder="1200" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Print Fee ($) — optional</label>
+      <input class="form-input" id="f-print" type="number" placeholder="0" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Deliverables (comma-separated)</label>
+      <input class="form-input" id="f-deliverables" placeholder="Logo files, Brand guide, Colour palette" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Client Brief / Notes</label>
+      <textarea class="brief-area" id="f-brief" style="min-height:80px" placeholder="Key notes from discovery call..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="addProject()">Create Project</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+const COLOR_MAP = {
+  'Logo':     {bg:'rgba(162,89,255,0.15)',text:'#a259ff'},
+  'Branding': {bg:'rgba(0,229,195,0.12)', text:'#00e5c3'},
+  'Socials':  {bg:'rgba(255,176,32,0.15)',text:'#ffb020'},
+  'Print':    {bg:'rgba(0,201,141,0.15)', text:'#00c98d'},
+  'Web':      {bg:'rgba(255,126,179,0.15)',text:'#ff7eb3'},
+};
+
+let projects = JSON.parse(localStorage.getItem('df_projects') || '[]');
+let activeFilter = 'all';
+
+function save() { localStorage.setItem('df_projects', JSON.stringify(projects)); }
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  if (el) el.classList.add('active');
+  if (id === 'payments') renderPayments();
+  if (id === 'analytics') renderAnalytics();
+  if (id === 'schedule') renderSchedule();
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+function openModal() { document.getElementById('modal').classList.add('show'); }
+function closeModal() { document.getElementById('modal').classList.remove('show'); }
+
+function addProject() {
+  const client = document.getElementById('f-client').value.trim();
+  if (!client) { toast('Please enter a client name'); return; }
+  if (projects.length >= 20) { toast('Maximum 20 active projects reached'); return; }
+
+  const delivs = document.getElementById('f-deliverables').value
+    .split(',').map(s => s.trim()).filter(Boolean)
+    .map(d => ({label: d, done: false}));
+
+  const deposit = parseFloat(document.getElementById('f-deposit').value) || 0;
+  const design  = parseFloat(document.getElementById('f-design').value)  || 0;
+  const print   = parseFloat(document.getElementById('f-print').value)   || 0;
+
+  projects.push({
+    id: Date.now(),
+    client,
+    type: document.getElementById('f-type').value,
+    status: document.getElementById('f-status').value,
+    due: document.getElementById('f-due').value,
+    milestones: [
+      { label: 'Deposit', amount: deposit, paid: false },
+      { label: 'Design Fee', amount: design, paid: false },
+      { label: 'Print Fee', amount: print, paid: false },
+    ],
+    deliverables: delivs,
+    brief: document.getElementById('f-brief').value,
+    images: [],
+  });
+  save();
+  closeModal();
+  clearForm();
+  renderGrid();
+  updateLedger();
+  toast('Project created ✦');
+}
+
+function clearForm() {
+  ['f-client','f-due','f-deposit','f-design','f-print','f-deliverables','f-brief']
+    .forEach(id => document.getElementById(id).value = '');
+}
+
+function filterProjects(val, el) {
+  activeFilter = val;
+  document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderGrid();
+}
+
+function renderGrid() {
+  const grid = document.getElementById('project-grid');
+  const list = activeFilter === 'all' ? projects : projects.filter(p => p.status === activeFilter);
+
+  document.getElementById('proj-count-badge').textContent = projects.length;
+  document.getElementById('proj-count').textContent = projects.length;
+
+  if (!list.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      <div class="empty-icon">✦</div>
+      <div class="empty-text">No projects yet — create one to get started</div>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(p => {
+    const col = COLOR_MAP[p.type] || COLOR_MAP['Logo'];
+    const badgeClass = { 'In Progress':'badge-progress','Feedback Needed':'badge-feedback','Finalized':'badge-final' }[p.status] || 'badge-review';
+    const paidCount = p.milestones.filter(m => m.paid && m.amount > 0).length;
+    const totalMil  = p.milestones.filter(m => m.amount > 0).length;
+    const dots = p.milestones.filter(m => m.amount > 0).map(m =>
+      `<div class="dot ${m.paid ? 'paid' : ''}" title="${m.label}: $${m.amount}"></div>`).join('');
+    const doneCount = p.deliverables.filter(d=>d.done).length;
+    const progress = p.deliverables.length ? Math.round((doneCount/p.deliverables.length)*100) : 0;
+    const chips = p.deliverables.slice(0,3).map(d=>`<span class="deliv-chip">${d.label}</span>`).join('');
+    const dueStr = p.due ? new Date(p.due+'T00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : 'No deadline';
+
+    return `<div class="project-card type-${p.type.toLowerCase()} fade-up" onclick="openPanel(${p.id})">
+      <div class="card-top">
+        <div class="client-initial" style="background:${col.bg};color:${col.text}">${p.client.charAt(0).toUpperCase()}</div>
+        <span class="badge ${badgeClass}">${p.status}</span>
+      </div>
+      <div class="card-client">${p.client}</div>
+      <div class="card-type">${p.type}</div>
+      ${p.deliverables.length ? `<div class="deliverables-preview">${chips}${p.deliverables.length>3?`<span class="deliv-chip">+${p.deliverables.length-3}</span>`:''}</div>` : ''}
+      ${p.deliverables.length ? `<div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>` : ''}
+      <div class="card-meta">
+        <div class="payment-dots">${dots}</div>
+        <div class="card-due">${dueStr}</div>
+        <div class="card-arrow">→</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateLedger() {
+  let earned = 0, pending = 0, feedback = 0;
+  projects.forEach(p => {
+    p.milestones.forEach(m => {
+      if (m.amount > 0) { m.paid ? (earned += m.amount) : (pending += m.amount); }
+    });
+    if (p.status === 'Feedback Needed') feedback++;
+  });
+  document.getElementById('earned-val').textContent = '$' + earned.toLocaleString();
+  document.getElementById('pending-val').textContent = '$' + pending.toLocaleString();
+  document.getElementById('proj-count').textContent = projects.length;
+  document.getElementById('proj-count-badge').textContent = projects.length;
+  document.getElementById('feedback-count').textContent = feedback;
+}
+
+function openPanel(id) {
+  const p = projects.find(x => x.id === id);
+  if (!p) return;
+  const col = COLOR_MAP[p.type] || COLOR_MAP['Logo'];
+  const badgeClass = {'In Progress':'badge-progress','Feedback Needed':'badge-feedback','Finalized':'badge-final'}[p.status]||'badge-review';
+
+  const milestoneHTML = p.milestones.map((m, i) => {
+    if (m.amount <= 0) return '';
+    return `<div class="milestone-row ${m.paid?'paid-row':''}" id="mil-${id}-${i}">
+      <div class="milestone-info">
+        <div class="milestone-label">${m.label}</div>
+        <div class="milestone-amount">$${m.amount.toLocaleString()}</div>
+      </div>
+      <button class="toggle-btn ${m.paid?'paid-btn':''}" onclick="toggleMilestone(${id},${i})">
+        ${m.paid ? '✓ Paid' : 'Mark Paid'}
+      </button>
+    </div>`;
+  }).join('');
+
+  const delivHTML = p.deliverables.map((d, i) =>
+    `<div class="deliv-item">
+      <div class="deliv-check ${d.done?'done':''}" onclick="toggleDeliv(${id},${i})"></div>
+      <span class="deliv-text ${d.done?'done-text':''}">${d.label}</span>
+    </div>`).join('');
+
+  const imgHTML = p.images.map((src, i) =>
+    `<div class="gallery-thumb">
+      <img src="${src}" alt="Design preview"/>
+      <button class="gallery-del" onclick="deleteImage(${id},${i})">✕</button>
+    </div>`).join('');
+
+  const addThumb = `<div class="gallery-thumb" onclick="document.getElementById('img-input-${id}').click()">
+    <div class="add-icon">+</div>
+    <input class="gallery-input" type="file" id="img-input-${id}" accept="image/*" multiple onchange="uploadImages(${id},this)"/>
+  </div>`;
+
+  document.getElementById('panel-content').innerHTML = `
+    <div class="panel-header">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="panel-initial" style="background:${col.bg};color:${col.text}">${p.client.charAt(0)}</div>
+        <div>
+          <div class="panel-title">${p.client}</div>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
+            <span class="badge ${badgeClass}">${p.status}</span>
+            <span style="font-size:12px;color:var(--text3)">${p.type}</span>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <select onchange="updateStatus(${id},this.value)" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:8px;font-family:var(--font-body);font-size:12px;outline:none">
+          ${['In Progress','Feedback Needed','Finalized'].map(s=>`<option ${s===p.status?'selected':''}>${s}</option>`).join('')}
+        </select>
+        <div class="panel-close" onclick="closePanel()">✕</div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">Payment Milestones</div>
+      ${milestoneHTML || '<div style="color:var(--text3);font-size:13px">No fees set for this project.</div>'}
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">Deliverables</div>
+      <div class="deliv-list" id="deliv-list-${id}">
+        ${delivHTML || '<div style="color:var(--text3);font-size:13px">No deliverables added yet.</div>'}
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <input id="new-deliv-${id}" class="form-input" style="font-size:13px;padding:7px 12px" placeholder="Add deliverable..." onkeydown="if(event.key==='Enter')addDeliverable(${id})"/>
+        <button class="btn btn-ghost" style="padding:7px 12px;font-size:12px" onclick="addDeliverable(${id})">Add</button>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">Design Gallery</div>
+      <div class="gallery-grid" id="gallery-${id}">
+        ${imgHTML}${addThumb}
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:6px">Low-res previews for your reference only</div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">Client Brief &amp; Notes</div>
+      <textarea class="brief-area" id="brief-${id}" placeholder="Paste your call notes, references, brand keywords...">${p.brief || ''}</textarea>
+      <button class="brief-save" onclick="saveBrief(${id})">Save Notes</button>
+    </div>
+
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);display:flex;justify-content:flex-end">
+      <button class="btn" style="background:rgba(255,85,85,0.1);color:var(--red);border:1px solid rgba(255,85,85,0.2);font-size:12px;padding:7px 14px" onclick="deleteProject(${id})">
+        Delete Project
+      </button>
+    </div>`;
+
+  document.getElementById('detail-panel').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+}
+
+function closePanel() {
+  document.getElementById('detail-panel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+function toggleMilestone(projId, idx) {
+  const p = projects.find(x => x.id === projId);
+  p.milestones[idx].paid = !p.milestones[idx].paid;
+  save(); updateLedger(); openPanel(projId);
+  toast(p.milestones[idx].paid ? '✓ Payment marked as paid' : 'Payment unmarked');
+}
+
+function toggleDeliv(projId, idx) {
+  const p = projects.find(x => x.id === projId);
+  p.deliverables[idx].done = !p.deliverables[idx].done;
+  save(); renderGrid(); openPanel(projId);
+}
+
+function addDeliverable(projId) {
+  const p = projects.find(x => x.id === projId);
+  const inp = document.getElementById('new-deliv-'+projId);
+  const val = inp.value.trim();
+  if (!val) return;
+  p.deliverables.push({label: val, done: false});
+  inp.value = '';
+  save(); openPanel(projId); renderGrid();
+}
+
+function saveBrief(projId) {
+  const p = projects.find(x => x.id === projId);
+  p.brief = document.getElementById('brief-'+projId).value;
+  save(); toast('Notes saved ✦');
+}
+
+function updateStatus(projId, val) {
+  const p = projects.find(x => x.id === projId);
+  p.status = val; save(); renderGrid(); updateLedger(); openPanel(projId);
+}
+
+function deleteProject(projId) {
+  if (!confirm('Delete this project?')) return;
+  projects = projects.filter(x => x.id !== projId);
+  save(); closePanel(); renderGrid(); updateLedger();
+  toast('Project deleted');
+}
+
+function uploadImages(projId, inp) {
+  const p = projects.find(x => x.id === projId);
+  const files = Array.from(inp.files);
+  let loaded = 0;
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      p.images.push(e.target.result);
+      loaded++;
+      if (loaded === files.length) { save(); openPanel(projId); toast('Images added'); }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function deleteImage(projId, idx) {
+  const p = projects.find(x => x.id === projId);
+  p.images.splice(idx, 1);
+  save(); openPanel(projId);
+}
+
+function renderPayments() {
+  let totalEarned = 0, totalPending = 0;
+  const tbody = document.getElementById('payment-tbody');
+  tbody.innerHTML = projects.map(p => {
+    const dep  = p.milestones[0]; const des = p.milestones[1]; const pri = p.milestones[2];
+    const total = p.milestones.reduce((s,m)=>s+m.amount,0);
+    [dep,des,pri].forEach(m => { if(m.paid) totalEarned+=m.amount; else totalPending+=m.amount; });
+    const cell = (m) => m.amount > 0
+      ? `<span style="color:${m.paid?'var(--green)':'var(--text3)'}">$${m.amount.toLocaleString()} ${m.paid?'✓':''}</span>`
+      : '<span style="color:var(--text3)">—</span>';
+    return `<tr>
+      <td><strong>${p.client}</strong></td>
+      <td><span class="badge" style="background:${COLOR_MAP[p.type]?.bg};color:${COLOR_MAP[p.type]?.text}">${p.type}</span></td>
+      <td>${cell(dep)}</td>
+      <td>${cell(des)}</td>
+      <td>${cell(pri)}</td>
+      <td><strong>$${total.toLocaleString()}</strong></td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:32px">No projects yet</td></tr>`;
+
+  const grand = totalEarned + totalPending;
+  document.getElementById('p-earned').textContent = '$' + totalEarned.toLocaleString();
+  document.getElementById('p-pending').textContent = '$' + totalPending.toLocaleString();
+  document.getElementById('p-rate').textContent = grand > 0 ? Math.round((totalEarned/grand)*100)+'%' : '0%';
+}
+
+function renderSchedule() {
+  const list = document.getElementById('schedule-list');
+  const sorted = [...projects].filter(p=>p.due).sort((a,b)=>new Date(a.due)-new Date(b.due));
+  if (!sorted.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-text">No deadlines set yet</div></div>`;
+    return;
+  }
+  list.innerHTML = sorted.map(p => {
+    const d = new Date(p.due+'T00:00');
+    const day = d.toLocaleDateString('en-US',{weekday:'short'});
+    const num = d.getDate();
+    const badgeClass = {'In Progress':'badge-progress','Feedback Needed':'badge-feedback','Finalized':'badge-final'}[p.status]||'badge-review';
+    const now = new Date(); now.setHours(0,0,0,0);
+    const diff = Math.round((d - now)/(1000*60*60*24));
+    const urgency = diff < 0 ? 'color:var(--red)' : diff < 3 ? 'color:var(--amber)' : 'color:var(--text2)';
+    const diffLabel = diff < 0 ? `${Math.abs(diff)}d overdue` : diff === 0 ? 'Today' : `${diff}d left`;
+    return `<div class="schedule-item" onclick="openPanel(${p.id});showPage('dashboard')">
+      <div class="sched-date">
+        <div class="sched-day">${day}</div>
+        <div class="sched-num">${num}</div>
+      </div>
+      <div class="sched-info">
+        <div class="sched-title">${p.client}</div>
+        <div class="sched-client">${p.type} · <span style="${urgency}">${diffLabel}</span></div>
+      </div>
+      <span class="badge ${badgeClass} sched-badge">${p.status}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderAnalytics() {
+  const total = projects.length;
+  const finalized = projects.filter(p=>p.status==='Finalized').length;
+  let totalVal = 0;
+  projects.forEach(p=>p.milestones.forEach(m=>totalVal+=m.amount));
+  document.getElementById('a-avg').textContent = total ? '$' + Math.round(totalVal/total).toLocaleString() : '$0';
+  document.getElementById('a-rate').textContent = total ? Math.round((finalized/total)*100)+'%' : '0%';
+
+  // Type breakdown
+  const types = {};
+  projects.forEach(p=>{ types[p.type]=(types[p.type]||0)+1; });
+  const typeDiv = document.getElementById('type-breakdown');
+  const cols = COLOR_MAP;
+  typeDiv.innerHTML = Object.entries(types).map(([t,c])=>{
+    const pct = total ? Math.round((c/total)*100) : 0;
+    return `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:13px;font-weight:500;color:${cols[t]?.text||'var(--text)'}">${t}</span>
+        <span style="font-size:12px;color:var(--text3)">${c} project${c>1?'s':''} · ${pct}%</span>
+      </div>
+      <div class="progress-bar" style="height:6px">
+        <div class="progress-fill" style="width:${pct}%;background:${cols[t]?.text||'var(--accent)'}"></div>
+      </div>
+    </div>`;
+  }).join('') || '<div style="color:var(--text3);font-size:13px">No data yet</div>';
+
+  // Payment health
+  const phDiv = document.getElementById('payment-health');
+  phDiv.innerHTML = projects.map(p=>{
+    const paid = p.milestones.filter(m=>m.paid&&m.amount>0).reduce((s,m)=>s+m.amount,0);
+    const total2 = p.milestones.reduce((s,m)=>s+m.amount,0);
+    const pct = total2 ? Math.round((paid/total2)*100) : 0;
+    return `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:13px;font-weight:500">${p.client}</span>
+        <span style="font-size:12px;color:${pct===100?'var(--green)':pct>0?'var(--amber)':'var(--text3)'}">${pct}% paid</span>
+      </div>
+      <div class="progress-bar" style="height:4px">
+        <div class="progress-fill" style="width:${pct}%;background:${pct===100?'var(--green)':pct>0?'var(--amber)':'var(--text3)'}"></div>
+      </div>
+    </div>`;
+  }).join('') || '<div style="color:var(--text3);font-size:13px">No projects to show</div>';
+}
+
+// Seed demo data if empty
+if (!projects.length) {
+  projects = [
+    { id:1, client:'Luna Bakery', type:'Branding', status:'In Progress', due:'2026-04-28',
+      milestones:[{label:'Deposit',amount:500,paid:true},{label:'Design Fee',amount:1200,paid:false},{label:'Print Fee',amount:300,paid:false}],
+      deliverables:[{label:'Logo (PNG/SVG)',done:true},{label:'Brand Guidelines',done:false},{label:'Colour Palette',done:true},{label:'Business Cards',done:false}],
+      brief:'Warm, artisan bakery vibe. Earthy tones, hand-drawn feel. Owner likes sourdough & rustic textures. Avoid anything corporate.',
+      images:[] },
+    { id:2, client:'Nova Fitness', type:'Logo', status:'Feedback Needed', due:'2026-04-20',
+      milestones:[{label:'Deposit',amount:300,paid:true},{label:'Design Fee',amount:800,paid:true},{label:'Print Fee',amount:0,paid:false}],
+      deliverables:[{label:'Primary Logo',done:true},{label:'Alternate Mark',done:true},{label:'Final File Package',done:false}],
+      brief:'Bold, energetic. Black & neon green. Target market 25-40 fitness enthusiasts. Needs to work on dark gym walls.',
+      images:[] },
+    { id:3, client:'Bloom Studio', type:'Socials', status:'In Progress', due:'2026-05-10',
+      milestones:[{label:'Deposit',amount:250,paid:true},{label:'Design Fee',amount:600,paid:false},{label:'Print Fee',amount:0,paid:false}],
+      deliverables:[{label:'IG Post Templates',done:false},{label:'Story Templates',done:false},{label:'Highlight Covers',done:false},{label:'Canva Kit Handoff',done:false}],
+      brief:'Floral, feminine, pastel. Pink & sage. 12 editable post templates + 6 story formats. Client runs a flower arrangement studio.',
+      images:[] },
+    { id:4, client:'Cipher Tech', type:'Web', status:'Finalized', due:'2026-03-30',
+      milestones:[{label:'Deposit',amount:750,paid:true},{label:'Design Fee',amount:2000,paid:true},{label:'Print Fee',amount:0,paid:false}],
+      deliverables:[{label:'Homepage Design',done:true},{label:'UI Components',done:true},{label:'Mobile Frames',done:true}],
+      brief:'SaaS startup. Dark mode, purple accent. Clean, minimal. Think Linear or Vercel aesthetic.',
+      images:[] },
+    { id:5, client:'Soleil Weddings', type:'Print', status:'Feedback Needed', due:'2026-04-25',
+      milestones:[{label:'Deposit',amount:400,paid:true},{label:'Design Fee',amount:900,paid:false},{label:'Print Fee',amount:450,paid:false}],
+      deliverables:[{label:'Invitation Suite',done:true},{label:'Menu Cards',done:false},{label:'Seating Chart',done:false},{label:'Thank You Cards',done:false}],
+      brief:'Elegant, romantic. Cream & gold foil. Client wants a letterpress look. Wedding is July 14 — tight turnaround.',
+      images:[] },
+  ];
+  save();
+}
+
+renderGrid();
+updateLedger();
+</script>
+</body>
+</html>
